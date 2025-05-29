@@ -28,7 +28,7 @@ pipeline {
 
         stage('Backend Unit Tests') {
             steps {
-                sh 'cd backend && npm test || true' // || true عشان مايفشلش الـ pipeline لو مفيش tests
+                sh 'cd backend && npm test || true'
             }
         }
 
@@ -116,6 +116,12 @@ pipeline {
                         git push https://$GIT_USER:$GIT_PASS@github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git HEAD:main
                     '''
                 }
+            }
+        }
+
+        stage('Integration Tests') {
+            steps {
+                sh 'cd tests && npm install && npm test || true'
             }
         }
     }

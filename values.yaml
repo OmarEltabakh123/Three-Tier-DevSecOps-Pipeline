@@ -1,0 +1,14 @@
+auth:
+  enabled: true
+  rootPassword: moora
+  username: root
+  password: moora
+  database: manga
+
+persistence:
+  enabled: true
+  size: 8Gi
+
+replicaSet:
+  enabled: false
+

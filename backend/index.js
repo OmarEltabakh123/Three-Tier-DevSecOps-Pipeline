@@ -5,8 +5,17 @@ const mongoose = require('mongoose');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Connect to MongoDB
-mongoose.connect(process.env.DATABASE_URL || 'mongodb://mongodb-service:27017/mydb', {
+// MongoDB connection parameters from environment variables or defaults
+const DB_USER = process.env.DB_USER || 'root';
+const DB_PASS = process.env.DB_PASS || 'moora';
+const DB_HOST = process.env.DB_HOST || 'mymongo';  // اسم الخدمة في الكلاستر
+const DB_PORT = process.env.DB_PORT || '27017';
+const DB_NAME = process.env.DB_NAME || 'manga';
+
+// بناء رابط الاتصال مع MongoDB
+const mongoURL = process.env.DATABASE_URL || `mongodb://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+
+mongoose.connect(mongoURL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
