@@ -1,20 +1,17 @@
 ReplicaCount: 2
 image:
   repository: omareltabakh/backend-app
-  pullPolicy: IfNotPresent 
-  tag: "latest" 
-
+  pullPolicy: IfNotPresent
+  tag: "latest"
 service:
   type: ClusterIP
   port: 80
-
 livenessProbe:
   httpGet:
     path: /health
     port: 3000
   initialDelaySeconds: 15
   timeoutSeconds: 5
-
 readinessProbe:
   httpGet:
     path: /health
@@ -40,4 +37,6 @@ env:
 serviceAccount:
   create: true
 ingress:
-  enabled: false 
+  enabled: false
+autoscaling:
+  enabled: false
