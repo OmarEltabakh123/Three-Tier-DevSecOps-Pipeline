@@ -1,8 +1,8 @@
-replicaCount: 2
+ReplicaCount: 2
 image:
   repository: omareltabakh/backend-app
-  pullPolicy: IfNotPresent
-  tag: "latest"
+  pullPolicy: IfNotPresent # ممكن نغير دي لـ Always بعدين
+  tag: "latest" # Jenkinsfile هيغير دي لـ BUILD_NUMBER
 service:
   type: ClusterIP
   port: 80
@@ -34,3 +34,5 @@ env:
       secretKeyRef:
         name: mongodb-secrets
         key: mongodb-url
+serviceAccount:
+  create: true
