@@ -1,13 +1,10 @@
 pipeline {
     agent {
         docker {
-            image 'jenkins-DinD'   // أو استخدم صورة مبنية فيها sonar-scanner
-            args '-u root'         // لو محتاج صلاحيات root
+            image 'jenkins-DinD'
+            args '-u root'
         }
     }
-    
-}
-
 
     environment {
         BACKEND_IMAGE = 'omareltabakh/backend-app'
@@ -133,6 +130,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             echo "Pipeline finished."
