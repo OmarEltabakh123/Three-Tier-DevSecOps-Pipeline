@@ -1,11 +1,6 @@
-module.exports = {
+export default {
   transform: {
-    '^.+\\.[t|j]sx?$': 'babel-jest',
+    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
   },
-  transformIgnorePatterns: [
-    '/node_modules/(?!axios)/', // استثناء axios من التجاهل
-  ],
-  moduleNameMapper: {
-    '\\.(css|less)$': '<rootDir>/__mocks__/styleMock.js',
-  },
+  testEnvironment: "jsdom"
 };
