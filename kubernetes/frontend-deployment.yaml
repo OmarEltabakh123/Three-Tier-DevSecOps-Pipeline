@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: omareltabakh/frontend-app:${IMAGE_TAG} 
+          image: amrhatem/frontend-app:${IMAGE_TAG} 
           ports:
             - containerPort: 80
 ---
