@@ -15,7 +15,7 @@ pipeline {
                 dir('backend') {
                     sh 'rm -rf node_modules package-lock.json'
                     sh 'npm install'
-                    sh 'CI=true npm test || echo "No tests found, continuing..."'
+                    sh 'CI=true npm test'  // حذف echo حتى يتوقف عند الفشل
                 }
             }
         }
@@ -24,19 +24,19 @@ pipeline {
                 dir('frontend') {
                     sh 'rm -rf node_modules package-lock.json'
                     sh 'npm install'
-                    sh 'npm test || echo "Frontend tests failed, continuing..."'
+                    sh 'npm test'  // حذف echo حتى يتوقف عند الفشل
                 }
             }
         }
         stage('Build Backend Docker Image') {
             steps {
-                sh 'docker build --no-cache -t ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ./backend'
+                sh 'docker build -t ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ./backend'
                 sh 'docker tag ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ${DOCKER_REGISTRY}/backend:latest'
             }
         }
         stage('Build Frontend Docker Image') {
             steps {
-                sh 'docker build --no-cache -t ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ./frontend'
+                sh 'docker build -t ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ./frontend'
                 sh 'docker tag ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ${DOCKER_REGISTRY}/frontend:latest'
             }
         }
@@ -89,4 +89,3 @@ pipeline {
         }
     }
 }
-
