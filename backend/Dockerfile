@@ -31,5 +31,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
   CMD wget --quiet --spider http://localhost:3000/health || exit 1
 
 # Start the app
-CMD ["npm", "start"]
+CMD ["node", "start"]
 
