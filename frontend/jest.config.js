@@ -1,6 +1,11 @@
 module.exports = {
   transform: {
-    '^.+\\.[tj]sx?$': 'babel-jest',
+    '^.+\\.[t|j]sx?$': 'babel-jest',
   },
-  moduleFileExtensions: ['js', 'jsx', 'json', 'node'],
+  transformIgnorePatterns: [
+    '/node_modules/(?!axios)/', // استثناء axios من التجاهل
+  ],
+  moduleNameMapper: {
+    '\\.(css|less)$': '<rootDir>/__mocks__/styleMock.js',
+  },
 };
