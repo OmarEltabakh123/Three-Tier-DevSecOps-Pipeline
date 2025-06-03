@@ -15,18 +15,17 @@ pipeline {
                 dir('backend') {
                     sh 'npm install'
                     sh 'CI=true npm test || echo "No tests found, continuing..."'
-
                 }
             }
         }
         stage('Run Frontend Tests') {
-    steps {
-        dir('frontend') {
-            sh 'npm install'
-            sh 'npm test || echo "Frontend tests failed, continuing..."'
+            steps {
+                dir('frontend') {
+                    sh 'npm install'
+                    sh 'npm test || echo "Frontend tests failed, continuing..."'
+                }
+            }
         }
-    }
-}
 
         stage('Build Backend Docker Image') {
             steps {
@@ -57,6 +56,21 @@ pipeline {
                 }
             }
         }
+        // --- المرحلة الجديدة لإضافة IMAGE_TAG في ملفات الـ Deployment ---
+        stage('Update K8s Manifests with Image Tags') {
+            steps {
+                // تعديل backend-deployment.yml
+                sh "sed -i 's|image: ${DOCKER_REGISTRY}/backend:latest|image: ${DOCKER_REGISTRY}/backend:${IMAGE_TAG}|g' kubernetes/backend-deployment.yml"
+                // تعديل frontend-deployment.yml
+                sh "sed -i 's|image: ${DOCKER_REGISTRY}/frontend:latest|image: ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}|g' kubernetes/frontend-deployment.yml"
+                //
+                // لو الـ Jenkinsfile ده هيعمل Git Commit بعد كده، هتضيف الأوامر دي:
+                // git add kubernetes/backend-deployment.yml kubernetes/frontend-deployment.yml
+                // git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}"
+                // git push
+            }
+        }
+        // --- نهاية المرحلة الجديدة ---
         stage('Deploy to Kubernetes') {
             steps {
                 withKubeConfig([credentialsId: 'kubeconfig']) {
