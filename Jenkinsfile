@@ -14,7 +14,7 @@ pipeline {
             steps {
                 dir('backend') {
                     sh 'npm install'
-                    sh 'npm test || echo "No tests found, continuing."'
+                    sh 'CI=true npm test || echo "No tests found, continuing..."'
 
                 }
             }
