@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_REGISTRY = 'omareltabakh123'
+        DOCKER_REGISTRY = 'amrhatem'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
     stages {
@@ -41,10 +41,8 @@ pipeline {
         }
         stage('Scan Docker Images with Trivy') {
             steps {
-                // --- تم التعديل هنا لكي يتجاهل Trivy الثغرات مؤقتاً ---
                 sh 'trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_REGISTRY}/backend:${IMAGE_TAG}'
                 sh 'trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}'
-                // --- نهاية التعديل ---
             }
         }
         stage('Push Docker Images') {
@@ -62,10 +60,9 @@ pipeline {
             steps {
                 sh "sed -i 's|image: ${DOCKER_REGISTRY}/backend:latest|image: ${DOCKER_REGISTRY}/backend:${IMAGE_TAG}|g' kubernetes/backend-deployment.yml"
                 sh "sed -i 's|image: ${DOCKER_REGISTRY}/frontend:latest|image: ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}|g' kubernetes/frontend-deployment.yml"
-                // لو الـ Jenkinsfile ده هيعمل Git Commit بعد كده، هتضيف الأوامر دي:
-                // git add kubernetes/backend-deployment.yml kubernetes/frontend-deployment.yml
-                // git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}"
-                // git push
+                git add kubernetes/backend-deployment.yml kubernetes/frontend-deployment.yml
+                git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}"
+                git push
             }
         }
         stage('Deploy to Kubernetes') {
