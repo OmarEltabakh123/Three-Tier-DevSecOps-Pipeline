@@ -5,7 +5,7 @@ pipeline {
             args '-u root'         // لو محتاج صلاحيات root
         }
     }
-    ...
+    
 }
 
 
