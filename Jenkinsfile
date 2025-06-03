@@ -20,14 +20,14 @@ pipeline {
             }
         }
         stage('Run Frontend Tests') {
-            steps {
-                dir('frontend') {
-                    sh 'npm install'
-                    sh 'npm test || echo "No tests found, continuing..."'
-
-                }
-            }
+    steps {
+        dir('frontend') {
+            sh 'npm install'
+            sh 'npm test || echo "Frontend tests failed, continuing..."'
         }
+    }
+}
+
         stage('Build Backend Docker Image') {
             steps {
                 sh 'docker build -t ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ./backend'
