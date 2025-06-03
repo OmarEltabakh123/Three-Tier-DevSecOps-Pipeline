@@ -38,8 +38,7 @@
     ]
   },
   "jest": {
-    "transformIgnorePatterns": [
-      "/node_modules/(?!(axios)/)"
-    ]
-  }
-}
+  "transformIgnorePatterns": [
+    "node_modules/(?!(some-module-you-need-to-transform)/)"
+  ]
+},
