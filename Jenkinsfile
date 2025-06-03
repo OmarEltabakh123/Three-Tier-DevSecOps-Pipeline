@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git'
+                git branch: 'master', url: 'https://github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git'
             }
         }
         stage('Run Backend Tests') {
