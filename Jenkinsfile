@@ -1,5 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'jenkins-DinD'   // أو استخدم صورة مبنية فيها sonar-scanner
+            args '-u root'         // لو محتاج صلاحيات root
+        }
+    }
+    ...
+}
+
 
     environment {
         BACKEND_IMAGE = 'omareltabakh/backend-app'
