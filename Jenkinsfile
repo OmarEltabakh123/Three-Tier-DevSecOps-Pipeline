@@ -1,145 +1,89 @@
 pipeline {
-    agent {
-        docker {
-            image 'jenkins-DinD'
-            args '-u root'
-        }
-    }
-
+    agent any
     environment {
-        BACKEND_IMAGE = 'omareltabakh/backend-app'
-        FRONTEND_IMAGE = 'omareltabakh/frontend-app'
-        TAG = "${BUILD_NUMBER}"
+        DOCKER_REGISTRY = 'omareltabakh123'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
-
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git'
+                git branch: 'main', url: 'https://github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git'
             }
         }
-
-        stage('Install Backend Dependencies') {
+        stage('Run Backend Tests') {
             steps {
-                sh 'cd backend && npm install'
+                dir('backend') {
+                    sh 'npm install'
+                    sh 'npm test' // تأكد من وجود اختبارات في المشروع
+                }
             }
         }
-
-        stage('Backend Code Quality') {
+        stage('Run Frontend Tests') {
             steps {
-                sh 'cd backend && sonar-scanner'
+                dir('frontend') {
+                    sh 'npm install'
+                    sh 'npm test' // تأكد من وجود اختبارات في المشروع
+                }
             }
         }
-
-        stage('Backend Unit Tests') {
-            steps {
-                sh 'cd backend && npm test || true'
-            }
-        }
-
-        stage('Backend Trivy File Scan') {
-            steps {
-                sh 'cd backend && trivy fs .'
-            }
-        }
-
         stage('Build Backend Docker Image') {
             steps {
-                sh 'cd backend && docker build -t $BACKEND_IMAGE:$TAG .'
+                sh 'docker build -t ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ./backend'
+                sh 'docker tag ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ${DOCKER_REGISTRY}/backend:latest'
             }
         }
-
-        stage('Backend Trivy Image Scan') {
-            steps {
-                sh 'trivy image --severity CRITICAL,HIGH --exit-code 1 $BACKEND_IMAGE:$TAG'
-            }
-        }
-
-        stage('Push Backend Docker Image') {
-            steps {
-                withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'PASS')]) {
-                    sh '''
-                        echo $PASS | docker login -u omareltabakh --password-stdin
-                        docker push $BACKEND_IMAGE:$TAG
-                    '''
-                }
-            }
-        }
-
-        stage('Install Frontend Dependencies') {
-            steps {
-                sh 'cd frontend && npm install'
-            }
-        }
-
-        stage('Frontend Code Quality') {
-            steps {
-                sh 'cd frontend && sonar-scanner'
-            }
-        }
-
-        stage('Frontend Unit Tests') {
-            steps {
-                sh 'cd frontend && npm test || true'
-            }
-        }
-
         stage('Build Frontend Docker Image') {
             steps {
-                sh 'cd frontend && npm run build'
-                sh 'cd frontend && docker build -t $FRONTEND_IMAGE:$TAG .'
+                sh 'docker build -t ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ./frontend'
+                sh 'docker tag ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ${DOCKER_REGISTRY}/frontend:latest'
             }
         }
-
-        stage('Frontend Trivy Image Scan') {
+        stage('Scan Docker Images with Trivy') {
             steps {
-                sh 'trivy image --severity CRITICAL,HIGH --exit-code 1 $FRONTEND_IMAGE:$TAG'
+                sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REGISTRY}/backend:${IMAGE_TAG}'
+                sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}'
             }
         }
-
-        stage('Push Frontend Docker Image') {
+        stage('Push Docker Images') {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'PASS')]) {
-                    sh '''
-                        echo $PASS | docker login -u omareltabakh --password-stdin
-                        docker push $FRONTEND_IMAGE:$TAG
-                    '''
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    sh 'docker push ${DOCKER_REGISTRY}/backend:${IMAGE_TAG}'
+                    sh 'docker push ${DOCKER_REGISTRY}/backend:latest'
+                    sh 'docker push ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}'
+                    sh 'docker push ${DOCKER_REGISTRY}/frontend:latest'
                 }
             }
         }
-
-        stage('Update Helm & Git Commit') {
+        stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                    sh '''
-                        sed -i "s/tag: .*/tag: \\"$TAG\\"/" backend/values.yaml
-                        sed -i "s/tag: .*/tag: \\"$TAG\\"/" frontend/values.yaml
-                        git config user.name "$GIT_USER"
-                        git config user.email "jenkins@example.com"
-                        git add backend/values.yaml frontend/values.yaml
-                        git commit -m "Update backend and frontend image tags to $TAG"
-                        git push https://$GIT_USER:$GIT_PASS@github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git HEAD:main
-                    '''
+                withKubeConfig([credentialsId: 'kubeconfig']) {
+                    sh 'kubectl apply -f kubernetes/mongo-deployment.yml'
+                    sh 'kubectl apply -f kubernetes/mongo-service.yml'
+                    sh 'kubectl apply -f kubernetes/backend-deployment.yml'
+                    sh 'kubectl apply -f kubernetes/backend-service.yml'
+                    sh 'kubectl apply -f kubernetes/frontend-deployment.yml'
+                    sh 'kubectl apply -f kubernetes/frontend-service.yml'
                 }
             }
         }
-
-        stage('Integration Tests') {
+        stage('Verify Deployment') {
             steps {
-                sh 'cd tests && npm install && npm test || true'
+                withKubeConfig([credentialsId: 'kubeconfig']) {
+                    sh 'kubectl rollout status deployment/backend-deployment'
+                    sh 'kubectl rollout status deployment/frontend-deployment'
+                    sh 'kubectl rollout status deployment/mongo-deployment'
+                    sh 'kubectl get pods -n default'
+                }
             }
         }
     }
-
     post {
         always {
-            echo "Pipeline finished."
-        }
-        success {
-            echo "Pipeline succeeded!"
+            sh 'docker logout'
         }
         failure {
-            echo "Pipeline failed."
+            echo 'Pipeline failed. Check the logs for details.'
         }
     }
 }
