@@ -13,30 +13,30 @@ pipeline {
         stage('Run Backend Tests') {
             steps {
                 dir('backend') {
+                    sh 'rm -rf node_modules package-lock.json'
                     sh 'npm install'
                     sh 'CI=true npm test || echo "No tests found, continuing..."'
-
                 }
             }
         }
         stage('Run Frontend Tests') {
-    steps {
-        dir('frontend') {
-            sh 'npm install'
-            sh 'npm test || echo "Frontend tests failed, continuing..."'
+            steps {
+                dir('frontend') {
+                    sh 'rm -rf node_modules package-lock.json'
+                    sh 'npm install'
+                    sh 'npm test || echo "Frontend tests failed, continuing..."'
+                }
+            }
         }
-    }
-}
-
         stage('Build Backend Docker Image') {
             steps {
-                sh 'docker build -t ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ./backend'
+                sh 'docker build --no-cache -t ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ./backend'
                 sh 'docker tag ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ${DOCKER_REGISTRY}/backend:latest'
             }
         }
         stage('Build Frontend Docker Image') {
             steps {
-                sh 'docker build -t ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ./frontend'
+                sh 'docker build --no-cache -t ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ./frontend'
                 sh 'docker tag ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ${DOCKER_REGISTRY}/frontend:latest'
             }
         }
@@ -89,3 +89,4 @@ pipeline {
         }
     }
 }
+
