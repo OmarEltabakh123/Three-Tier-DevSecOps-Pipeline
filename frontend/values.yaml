@@ -1,23 +1,23 @@
 replicaCount: 2
 image:
-  repository: omareltabakh/frontend-app
-  pullPolicy: IfNotPresent
-  tag: "latest"
+  repository: amrhatem/frontend-app 
+  pullPolicy: Always            
+  tag: "${IMAGE_TAG}"           
 service:
   type: ClusterIP
   port: 80
 ingress:
   enabled: true
-  className: "nginx"
+  className: "nginx" 
   hosts:
-    - host: frontend.example.com
+    - host: frontend.example.com 
       paths:
         - path: /
           pathType: Prefix
-  tls:
+  tls: 
     - secretName: frontend-tls
       hosts:
-        - frontend.example.com
+        - frontend.example.com 
 resources:
   limits:
     cpu: "500m"
@@ -30,13 +30,13 @@ securityContext:
   runAsUser: 1000
 livenessProbe:
   httpGet:
-    path: /
+    path: / 
     port: 80
   initialDelaySeconds: 15
   timeoutSeconds: 5
 readinessProbe:
   httpGet:
-    path: /
+    path: / 
     port: 80
   initialDelaySeconds: 10
   timeoutSeconds: 5
