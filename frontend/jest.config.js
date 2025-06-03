@@ -1,7 +1,9 @@
-module.exports = {
-  transform: {
-    "^.+\\.(js|jsx)$": "babel-jest"
-  },
-  testEnvironment: "jsdom",
-  moduleFileExtensions: ["js", "jsx"],
-};
+export default {
+  transform: {},
+  testEnvironment: 'jsdom',
+  extensionsToTreatAsEsm: ['.js', '.jsx'],
+  moduleNameMapper: {
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
+  }
+}
+
