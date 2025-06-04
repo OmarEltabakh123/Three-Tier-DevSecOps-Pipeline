@@ -22,3 +22,6 @@
 *.tmproj
 .vscode/
 templates/tests/
+# Ignore Node.js package files
+package.json
+package-lock.json
