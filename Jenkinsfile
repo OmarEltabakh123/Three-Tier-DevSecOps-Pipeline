@@ -57,18 +57,20 @@ pipeline {
             }
         }
         stage('Update K8s Manifests with Image Tags') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) { 
-                    sh '''
-                        sed -i "s|image: amrhatem/backend:.*|image: amrhatem/backend:${IMAGE_TAG}|g" kubernetes/backend-deployment.yaml
-                        sed -i "s|image: amrhatem/frontend:.*|image: amrhatem/frontend:${IMAGE_TAG}|g" kubernetes/frontend-deployment.yaml
-                        git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml
-                        git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}"
-                        git push https://github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git --set-upstream origin branch-2
-                    '''
-                } 
-            }
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+            sh '''
+                sed -i "s|image: amrhatem/backend:.*|image: amrhatem/backend:${IMAGE_TAG}|g" kubernetes/backend-deployment.yaml
+                sed -i "s|image: amrhatem/frontend:.*|image: amrhatem/frontend:${IMAGE_TAG}|g" kubernetes/frontend-deployment.yaml
+                git config user.email "amr.hatem2h@gmail.com"
+                git config user.name "moraa121212"
+                git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml
+                git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}" || echo "No changes to commit"
+                git push https://${GIT_USER}:${GIT_PASS@github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git HEAD:branch-2
+            '''
         }
+    }
+}
         stage('Deploy to Kubernetes') {
             steps {
                 withKubeConfig([credentialsId: 'kubeconfig']) {
