@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: amrhatem/backend-app:latest
+          image: amrhatem/backend:latest
           ports:
             - containerPort: 3000
           env:
