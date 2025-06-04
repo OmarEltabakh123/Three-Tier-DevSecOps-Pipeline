@@ -63,7 +63,7 @@ pipeline {
                     sed -i "s|image: amrhatem/frontend:.*|image: amrhatem/frontend:${IMAGE_TAG}|g" kubernetes/frontend-deployment.yaml
                     git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml
                     git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}"
-                    git push
+                    git push --set-upstream origin branch-2
                 '''
             }
         }
