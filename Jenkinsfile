@@ -71,29 +71,6 @@ pipeline {
         }
     }
 }
-        stage('Deploy to Kubernetes') {
-            steps {
-                withKubeConfig([credentialsId: 'kubeconfig']) {
-                    sh 'kubectl apply -f kubernetes/mongo-deployment.yml'
-                    sh 'kubectl apply -f kubernetes/mongo-service.yml'
-                    sh 'kubectl apply -f kubernetes/backend-deployment.yml'
-                    sh 'kubectl apply -f kubernetes/backend-service.yml'
-                    sh 'kubectl apply -f kubernetes/frontend-deployment.yml'
-                    sh 'kubectl apply -f kubernetes/frontend-service.yml'
-                }
-            }
-        }
-        stage('Verify Deployment') {
-            steps {
-                withKubeConfig([credentialsId: 'kubeconfig']) {
-                    sh 'kubectl rollout status deployment/backend-deployment'
-                    sh 'kubectl rollout status deployment/frontend-deployment'
-                    sh 'kubectl rollout status deployment/mongo-deployment'
-                    sh 'kubectl get pods -n default'
-                }
-            }
-        }
-    }
     post {
         always {
             sh 'docker logout'
