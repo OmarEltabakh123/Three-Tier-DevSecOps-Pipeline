@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: amrhatem/backend-app:${IMAGE_TAG} 
+          image: amrhatem/backend-app:latest
           ports:
             - containerPort: 3000
           env:
