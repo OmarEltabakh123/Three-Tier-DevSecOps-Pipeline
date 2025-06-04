@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: amrhatem/frontend:36
+          image: amrhatem/frontend:37
           ports:
             - containerPort: 80
 ---
