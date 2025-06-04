@@ -66,7 +66,7 @@ pipeline {
                 git config user.name "moraa121212"
                 git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml
                 git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}" || echo "No changes to commit"
-                git push https://${GIT_USER}:${GIT_PASS@github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git HEAD:branch-2
+                git push https://${GIT_USER}:${GIT_PASS}@github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git HEAD:branch-2
             '''
         }
     }
