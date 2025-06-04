@@ -61,7 +61,7 @@ pipeline {
                 sh '''
                     sed -i 's|image: ${DOCKER_REGISTRY}/backend:latest|image: ${DOCKER_REGISTRY}/backend:${IMAGE_TAG}|g' kubernetes/backend-deployment.yaml
                     sed -i 's|image: ${DOCKER_REGISTRY}/frontend:latest|image: ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}|g' kubernetes/frontend-deployment.yaml
-                    git add kubernetes/backend-deployment.yml kubernetes/frontend-deployment.yml
+                    git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml
                     git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}"
                     git push
                 '''
