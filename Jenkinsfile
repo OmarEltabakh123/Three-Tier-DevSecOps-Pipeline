@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'omareltabakh123'
+        DOCKER_REGISTRY = 'omareltabakh'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
 
@@ -35,22 +35,22 @@ pipeline {
 
         stage('Build Backend Docker Image') {
             steps {
-                sh 'docker build -t ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ./backend'
-                sh 'docker tag ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} ${DOCKER_REGISTRY}/backend:latest'
+                sh 'docker build -t ${DOCKER_REGISTRY}/backend-app:${IMAGE_TAG} ./backend'
+                sh 'docker tag ${DOCKER_REGISTRY}/backend-app:${IMAGE_TAG} ${DOCKER_REGISTRY}/backend-app:latest'
             }
         }
 
         stage('Build Frontend Docker Image') {
             steps {
-                sh 'docker build -t ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ./frontend'
-                sh 'docker tag ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} ${DOCKER_REGISTRY}/frontend:latest'
+                sh 'docker build -t ${DOCKER_REGISTRY}/frontend-app:${IMAGE_TAG} ./frontend'
+                sh 'docker tag ${DOCKER_REGISTRY}/frontend-app:${IMAGE_TAG} ${DOCKER_REGISTRY}/frontend-app:latest'
             }
         }
 
         stage('Scan Docker Images with Trivy') {
             steps {
-                sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REGISTRY}/backend:${IMAGE_TAG} || true'
-                sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} || true'
+                sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REGISTRY}/backend-app:${IMAGE_TAG} || true'
+                sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REGISTRY}/frontend-app:${IMAGE_TAG} || true'
             }
         }
 
@@ -58,10 +58,10 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-                    sh 'docker push ${DOCKER_REGISTRY}/backend:${IMAGE_TAG}'
-                    sh 'docker push ${DOCKER_REGISTRY}/backend:latest'
-                    sh 'docker push ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}'
-                    sh 'docker push ${DOCKER_REGISTRY}/frontend:latest'
+                    sh 'docker push ${DOCKER_REGISTRY}/backend-app:${IMAGE_TAG}'
+                    sh 'docker push ${DOCKER_REGISTRY}/backend-app:latest'
+                    sh 'docker push ${DOCKER_REGISTRY}/frontend-app:${IMAGE_TAG}'
+                    sh 'docker push ${DOCKER_REGISTRY}/frontend-app:latest'
                 }
             }
         }
