@@ -58,13 +58,15 @@ pipeline {
         }
         stage('Update K8s Manifests with Image Tags') {
             steps {
-                sh '''
-                    sed -i "s|image: amrhatem/backend:.*|image: amrhatem/backend:${IMAGE_TAG}|g" kubernetes/backend-deployment.yaml
-                    sed -i "s|image: amrhatem/frontend:.*|image: amrhatem/frontend:${IMAGE_TAG}|g" kubernetes/frontend-deployment.yaml
-                    git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml
-                    git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}"
-                    git push https://${GIT_USER}:${GIT_PASS}@github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git --set-upstream origin branch-2
-                '''
+                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) { 
+                    sh '''
+                        sed -i "s|image: amrhatem/backend:.*|image: amrhatem/backend:${IMAGE_TAG}|g" kubernetes/backend-deployment.yaml
+                        sed -i "s|image: amrhatem/frontend:.*|image: amrhatem/frontend:${IMAGE_TAG}|g" kubernetes/frontend-deployment.yaml
+                        git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml
+                        git commit -m "Update K8s manifests with new image tags for build ${IMAGE_TAG}"
+                        git push https://${GIT_USER}:${GIT_PASS}@github.com/OmarEltabakh123/Three-Tier-DevSecOps-Pipeline.git --set-upstream origin branch-2
+                    '''
+                } 
             }
         }
         stage('Deploy to Kubernetes') {
