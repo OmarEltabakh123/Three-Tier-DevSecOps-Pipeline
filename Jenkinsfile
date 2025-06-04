@@ -58,7 +58,7 @@ pipeline {
         }
         stage('Update K8s Manifests with Image Tags') {
     steps {
-        withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+        withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
             sh '''
                 sed -i "s|image: amrhatem/backend:.*|image: amrhatem/backend:${IMAGE_TAG}|g" kubernetes/backend-deployment.yaml
                 sed -i "s|image: amrhatem/frontend:.*|image: amrhatem/frontend:${IMAGE_TAG}|g" kubernetes/frontend-deployment.yaml
